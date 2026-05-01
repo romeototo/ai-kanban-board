@@ -12,7 +12,10 @@ A premium, highly interactive **Real-time Kanban Board** featuring native Drag &
 
 ## 🚀 Key Features
 
-*   **🪄 AI Task Decomposition:** Input a broad project idea, and the integrated **Google Gemini 2.5 Flash** model will instantly break it down into 3-5 actionable tasks and populate your "To Do" column.
+*   **🪄 AI Task Decomposition:** Input a broad project idea, and the integrated **Google Gemini 2.5 Flash** model will instantly break it down into actionable tasks.
+*   **🤖 AI Agile Coach:** Click the "Analytics" button to have the AI review your entire board and provide immediate, punchy feedback on your workload distribution.
+*   **🔒 Private Authenticated Boards:** Features **Firebase Authentication (Google Sign-In)**, ensuring each user has a completely isolated, private workspace.
+*   **📱 Cross-Device Drag & Drop:** Implements Native HTML5 Drag and Drop, enhanced with a custom Polyfill for seamless touch interactions on mobile devices.
 *   **⚡ Real-Time Synchronization:** Powered by **Firebase Firestore**, any task moved, added, or deleted instantly updates across all open clients/tabs without requiring a page refresh.
 *   **🖐️ Native Drag & Drop:** Implements the HTML5 Native Drag and Drop API for smooth, zero-dependency card movement across columns.
 *   **💎 Premium UI/UX:** Features a modern Dark Mode interface with Glassmorphism (blur filters), CSS micro-animations, and dynamic visual feedback during drag operations.
@@ -28,6 +31,7 @@ graph TD
     
     subgraph "Core Logic"
         DD[Native Drag & Drop API]
+        Auth[Firebase Auth Logic]
         AI[AI Prompt Engineer]
         DB[Firestore Handlers]
     end
@@ -38,6 +42,7 @@ graph TD
     end
 
     UI --> DD
+    UI --> Auth
     UI --> AI
     UI --> DB
     
