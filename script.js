@@ -34,6 +34,7 @@ loginBtn.addEventListener('click', async () => {
         await signInWithPopup(auth, provider);
     } catch (e) {
         console.error("Login failed", e);
+        alert("Login Error: " + e.message);
     }
 });
 
