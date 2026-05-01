@@ -1,21 +1,38 @@
-// --- Initial State (Mock Data Before Firebase) ---
-let tasks = [
-    { id: '1', content: 'Design Kanban UI (Glassmorphism)', status: 'todo' },
-    { id: '2', content: 'Implement Drag and Drop logic in Vanilla JS', status: 'doing' },
-    { id: '3', content: 'Setup basic HTML/CSS skeleton', status: 'done' }
-];
+// --- Firebase Setup ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// --- DOM Elements ---
+const firebaseConfig = {
+    apiKey: "AIzaSyDt55WQCiR4oG2zO1sYxBlJfENklxID5BE",
+    authDomain: "ai-kanban-board-8cc26.firebaseapp.com",
+    projectId: "ai-kanban-board-8cc26",
+    storageBucket: "ai-kanban-board-8cc26.firebasestorage.app",
+    messagingSenderId: "100494573904",
+    appId: "1:100494573904:web:ac14a9e32d4ff55eb72c55"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const tasksCol = collection(db, 'tasks');
+
+// --- Global State ---
+let tasks = [];
 const lists = document.querySelectorAll('.task-list');
 
 // --- Initialization ---
 function init() {
-    renderTasks();
     setupDragAndDrop();
+    
+    // Listen to Real-time Updates from Firestore
+    onSnapshot(tasksCol, (snapshot) => {
+        tasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // Sort by creation time so they don't jump randomly
+        tasks.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+        renderTasks();
+    });
 }
 
 function renderTasks() {
-    // Clear all lists
     lists.forEach(list => list.innerHTML = '');
 
     tasks.forEach(task => {
@@ -47,12 +64,16 @@ function attachDragEventsToCards() {
             card.classList.add('dragging');
         });
 
-        card.addEventListener('dragend', () => {
+        card.addEventListener('dragend', async () => {
             card.classList.remove('dragging');
-            // Update status in data array based on new parent
             const newStatus = card.parentElement.dataset.status;
             const taskId = card.dataset.id;
-            updateTaskStatus(taskId, newStatus);
+            
+            // Check if status actually changed before updating DB
+            const task = tasks.find(t => t.id === taskId);
+            if (task && task.status !== newStatus) {
+                await updateTaskStatus(taskId, newStatus);
+            }
         });
     });
 }
@@ -60,11 +81,11 @@ function attachDragEventsToCards() {
 function setupDragAndDrop() {
     lists.forEach(list => {
         list.addEventListener('dragover', e => {
-            e.preventDefault(); // Necessary to allow dropping
+            e.preventDefault(); 
             list.classList.add('drag-over');
             const draggingCard = document.querySelector('.dragging');
             if(draggingCard) {
-                list.appendChild(draggingCard); // Move element visually
+                list.appendChild(draggingCard);
             }
         });
 
@@ -78,35 +99,42 @@ function setupDragAndDrop() {
     });
 }
 
-// --- Task Actions ---
-function addNewTask(columnId) {
+// --- Task Actions (Exposed to Window for HTML onclick) ---
+window.addNewTask = async function(columnId) {
     const content = prompt("Enter new task:");
     if (!content || content.trim() === '') return;
 
     const status = document.getElementById(columnId).querySelector('.task-list').dataset.status;
-    const newTask = {
-        id: Date.now().toString(), // Simple unique ID
-        content: content,
-        status: status
-    };
     
-    tasks.push(newTask);
-    renderTasks();
-}
-
-// Ensure global scope for inline onclick handler
-window.deleteTask = function(id) {
-    if(confirm('Delete this task?')) {
-        tasks = tasks.filter(t => t.id !== id);
-        renderTasks();
+    try {
+        await addDoc(tasksCol, {
+            content: content,
+            status: status,
+            createdAt: Date.now()
+        });
+    } catch (e) {
+        console.error("Error adding document: ", e);
+        alert("Failed to add task. Please check if Firestore is enabled and rules are open.");
     }
-}
+};
 
-function updateTaskStatus(id, newStatus) {
-    const task = tasks.find(t => t.id === id);
-    if (task) {
-        task.status = newStatus;
-        // Ready for Firebase update here!
+window.deleteTask = async function(id) {
+    if(confirm('Delete this task?')) {
+        try {
+            await deleteDoc(doc(db, 'tasks', id));
+        } catch (e) {
+            console.error("Error deleting document: ", e);
+        }
+    }
+};
+
+async function updateTaskStatus(id, newStatus) {
+    try {
+        await updateDoc(doc(db, 'tasks', id), {
+            status: newStatus
+        });
+    } catch (e) {
+        console.error("Error updating status: ", e);
     }
 }
 
