@@ -140,3 +140,79 @@ async function updateTaskStatus(id, newStatus) {
 
 // Start
 init();
+
+// --- AI Integration (Gemini) ---
+document.getElementById('aiGenerateBtn').addEventListener('click', async () => {
+    const input = document.getElementById('aiTaskInput');
+    const promptText = input.value.trim();
+    if (!promptText) return;
+
+    let apiKey = localStorage.getItem('gemini_api_key');
+    if (!apiKey) {
+        apiKey = prompt("Please enter your Gemini API Key to use the AI Assistant:");
+        if (!apiKey) return;
+        localStorage.setItem('gemini_api_key', apiKey);
+    }
+
+    const btn = document.getElementById('aiGenerateBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `<span class="material-icons">hourglass_empty</span> Generating...`;
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: `Break down the following project into 3 to 5 small, actionable tasks suitable for a Kanban board.
+Respond ONLY with a valid JSON array of strings. Do not include markdown formatting like \`\`\`json or any other text.
+Project: ${promptText}`
+                    }]
+                }],
+                generationConfig: {
+                    temperature: 0.2
+                }
+            })
+        });
+
+        if (!response.ok) {
+            if(response.status === 400 || response.status === 403) {
+                localStorage.removeItem('gemini_api_key');
+                throw new Error("Invalid API Key. Please try again.");
+            }
+            throw new Error(`API Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        let textResult = data.candidates[0].content.parts[0].text;
+        
+        // Clean up markdown code blocks if AI ignored instructions
+        textResult = textResult.replace(/```json/g, '').replace(/```/g, '').trim();
+        
+        const tasksArr = JSON.parse(textResult);
+
+        if (Array.isArray(tasksArr)) {
+            for (const taskStr of tasksArr) {
+                await addDoc(tasksCol, {
+                    content: `✨ [AI] ${taskStr}`,
+                    status: 'todo',
+                    createdAt: Date.now()
+                });
+                // Small delay to ensure order
+                await new Promise(r => setTimeout(r, 10));
+            }
+            input.value = '';
+        } else {
+            throw new Error("AI did not return an array.");
+        }
+
+    } catch (e) {
+        console.error(e);
+        alert("AI Generation failed: " + e.message);
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+});
