@@ -1,6 +1,7 @@
 // --- Firebase Setup ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDt55WQCiR4oG2zO1sYxBlJfENklxID5BE",
@@ -13,18 +14,60 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 const tasksCol = collection(db, 'tasks');
 
 // --- Global State ---
 let tasks = [];
+let currentUser = null;
+let unsubscribeSnapshot = null;
 const lists = document.querySelectorAll('.task-list');
 
+// --- Auth Logic ---
+const authOverlay = document.getElementById('auth-overlay');
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+
+loginBtn.addEventListener('click', async () => {
+    try {
+        await signInWithPopup(auth, provider);
+    } catch (e) {
+        console.error("Login failed", e);
+    }
+});
+
+logoutBtn.addEventListener('click', () => signOut(auth));
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        currentUser = user;
+        authOverlay.style.display = 'none';
+        logoutBtn.style.display = 'inline-flex';
+        initBoard();
+    } else {
+        currentUser = null;
+        authOverlay.style.display = 'flex';
+        logoutBtn.style.display = 'none';
+        if (unsubscribeSnapshot) {
+            unsubscribeSnapshot();
+            unsubscribeSnapshot = null;
+        }
+        tasks = [];
+        renderTasks();
+    }
+});
+
 // --- Initialization ---
-function init() {
+function initBoard() {
     setupDragAndDrop();
     
-    // Listen to Real-time Updates from Firestore
-    onSnapshot(tasksCol, (snapshot) => {
+    // Listen to Real-time Updates from Firestore (User Specific)
+    const q = query(tasksCol, where("userId", "==", currentUser.uid));
+    
+    if (unsubscribeSnapshot) unsubscribeSnapshot();
+    
+    unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
         tasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         // Sort by creation time so they don't jump randomly
         tasks.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
@@ -43,11 +86,16 @@ function renderTasks() {
             card.draggable = true;
             card.dataset.id = task.id;
             card.innerHTML = `
-                <div class="task-content">${task.content}</div>
-                <button class="delete-btn" onclick="deleteTask('${task.id}')">
+                <div class="task-content" style="width: 100%;">
+                    <div style="font-weight: 500;">${task.content}</div>
+                    ${task.dueDate ? `<div style="font-size: 0.75rem; color: #a855f7; margin-top: 4px;">⏰ ${task.dueDate}</div>` : ''}
+                    ${task.description ? `<div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${task.description}</div>` : ''}
+                </div>
+                <button class="delete-btn" onclick="event.stopPropagation(); deleteTask('${task.id}')">
                     <span class="material-icons" style="font-size: 16px;">delete</span>
                 </button>
             `;
+            card.addEventListener('click', () => openTaskModal(task));
             list.appendChild(card);
         }
     });
@@ -110,7 +158,8 @@ window.addNewTask = async function(columnId) {
         await addDoc(tasksCol, {
             content: content,
             status: status,
-            createdAt: Date.now()
+            createdAt: Date.now(),
+            userId: currentUser.uid
         });
     } catch (e) {
         console.error("Error adding document: ", e);
@@ -138,8 +187,44 @@ async function updateTaskStatus(id, newStatus) {
     }
 }
 
-// Start
-init();
+// --- Modal Logic ---
+let currentEditingTaskId = null;
+const sharedModal = document.getElementById('shared-modal');
+const modalTitle = document.getElementById('modalTitle');
+const taskModalBody = document.getElementById('taskModalBody');
+const aiReviewBody = document.getElementById('aiReviewBody');
+const taskDescInput = document.getElementById('taskDescInput');
+const taskDateInput = document.getElementById('taskDateInput');
+
+document.getElementById('closeModalBtn').addEventListener('click', () => sharedModal.style.display = 'none');
+
+window.openTaskModal = function(task) {
+    currentEditingTaskId = task.id;
+    modalTitle.innerText = "Edit Task";
+    taskModalBody.style.display = 'block';
+    aiReviewBody.style.display = 'none';
+    taskDescInput.value = task.description || '';
+    taskDateInput.value = task.dueDate || '';
+    sharedModal.style.display = 'flex';
+};
+
+document.getElementById('saveTaskBtn').addEventListener('click', async () => {
+    if (!currentEditingTaskId) return;
+    try {
+        const btn = document.getElementById('saveTaskBtn');
+        btn.innerText = "Saving...";
+        await updateDoc(doc(db, 'tasks', currentEditingTaskId), {
+            description: taskDescInput.value.trim(),
+            dueDate: taskDateInput.value
+        });
+        sharedModal.style.display = 'none';
+        btn.innerText = "Save Details";
+    } catch(e) {
+        alert("Failed to save: " + e.message);
+    }
+});
+
+// Auth state listener triggers initBoard() automatically.
 
 // --- AI Integration (Gemini) ---
 document.getElementById('aiGenerateBtn').addEventListener('click', async () => {
@@ -198,7 +283,8 @@ Project: ${promptText}`
                 await addDoc(tasksCol, {
                     content: `✨ [AI] ${taskStr}`,
                     status: 'todo',
-                    createdAt: Date.now()
+                    createdAt: Date.now(),
+                    userId: currentUser.uid
                 });
                 // Small delay to ensure order
                 await new Promise(r => setTimeout(r, 10));
@@ -211,6 +297,62 @@ Project: ${promptText}`
     } catch (e) {
         console.error(e);
         alert("AI Generation failed: " + e.message);
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+});
+
+document.getElementById('aiReviewBtn').addEventListener('click', async () => {
+    const doingTasks = tasks.filter(t => t.status === 'doing').map(t => t.content);
+    const todoTasks = tasks.filter(t => t.status === 'todo').map(t => t.content);
+    
+    if (doingTasks.length === 0 && todoTasks.length === 0) {
+        alert("Board is empty! Nothing to review.");
+        return;
+    }
+
+    let apiKey = localStorage.getItem('gemini_api_key');
+    if (!apiKey) {
+        apiKey = prompt("Please enter your Gemini API Key:");
+        if (!apiKey) return;
+        localStorage.setItem('gemini_api_key', apiKey);
+    }
+
+    const btn = document.getElementById('aiReviewBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `<span class="material-icons">hourglass_empty</span> Analyzing...`;
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: `You are an expert Agile/Kanban coach. Review the user's current tasks and provide a short, punchy, and helpful analysis. Limit to 3-4 sentences. Be encouraging but realistic.
+                        Tasks in "Doing" column: ${doingTasks.join(', ') || 'None'}
+                        Tasks in "To Do" column: ${todoTasks.join(', ') || 'None'}`
+                    }]
+                }],
+                generationConfig: { temperature: 0.4 }
+            })
+        });
+
+        if (!response.ok) throw new Error("API Error");
+
+        const data = await response.json();
+        const analysis = data.candidates[0].content.parts[0].text;
+        
+        modalTitle.innerText = "🤖 AI Board Analysis";
+        taskModalBody.style.display = 'none';
+        aiReviewBody.style.display = 'block';
+        document.getElementById('aiReviewContent').innerText = analysis;
+        sharedModal.style.display = 'flex';
+
+    } catch (e) {
+        alert("AI Review failed: " + e.message);
     } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;

@@ -15,9 +15,24 @@
         </div>
         <div class="ai-input-group">
             <input type="text" id="aiTaskInput" placeholder="✨ Ask AI to break down a project... (e.g. 'Build a blog')">
-            <button id="aiGenerateBtn"><span class="material-icons">auto_awesome</span> Generate Tasks</button>
+            <button id="aiGenerateBtn"><span class="material-icons">auto_awesome</span> Generate</button>
+            <button id="aiReviewBtn" style="background: #10b981; margin-left: 5px;"><span class="material-icons">analytics</span> Review</button>
+            <button id="logoutBtn" style="display: none; background: #ef4444; margin-left: 5px;"><span class="material-icons">logout</span></button>
         </div>
     </header>
+
+    <!-- Auth Overlay -->
+    <div id="auth-overlay" class="auth-overlay">
+        <div class="auth-card">
+            <span class="material-icons" style="font-size: 48px; color: #6366f1; margin-bottom: 1rem;">lock_person</span>
+            <h2>Private Kanban Board</h2>
+            <p>Please sign in to view and manage your personal tasks.</p>
+            <button id="loginBtn" class="google-login-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo" width="20">
+                Sign in with Google
+            </button>
+        </div>
+    </div>
 
     <main class="board">
         <!-- To Do Column -->
@@ -48,6 +63,31 @@
         </div>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@3.0.0-beta.0/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@3.0.0-beta.0/scroll-behaviour.min.js"></script>
+    <script>
+        MobileDragDrop.polyfill({ dragImageTranslateOverride: MobileDragDrop.scrollBehaviourDragImageTranslateOverride });
+        window.addEventListener('touchmove', function() {}, {passive: false}); // Prevent scroll while dragging on some devices
+    </script>
     <script type="module" src="script.js"></script>
+
+    <!-- Task Details / AI Review Modal -->
+    <div id="shared-modal" class="auth-overlay" style="display: none; z-index: 2000;">
+        <div class="auth-card" style="text-align: left; align-items: stretch; width: 450px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2 id="modalTitle" style="margin: 0; font-size: 1.25rem;">Task Details</h2>
+                <button id="closeModalBtn" style="background: none; border: none; color: var(--text-muted); cursor: pointer; display: flex;"><span class="material-icons">close</span></button>
+            </div>
+            <div id="taskModalBody">
+                <textarea id="taskDescInput" placeholder="Add description..." style="width: 100%; height: 100px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 0.5rem; border-radius: 4px; margin-bottom: 1rem; resize: none; font-family: inherit;"></textarea>
+                <label style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">Due Date:</label>
+                <input type="date" id="taskDateInput" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 0.5rem; border-radius: 4px; margin-bottom: 1rem; width: 100%; font-family: inherit;">
+                <button id="saveTaskBtn" style="background: var(--primary); color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s;">Save Details</button>
+            </div>
+            <div id="aiReviewBody" style="display: none;">
+                <div id="aiReviewContent" style="font-size: 0.95rem; line-height: 1.6; color: #cbd5e1; max-height: 300px; overflow-y: auto; white-space: pre-wrap;"></div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
