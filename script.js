@@ -27,7 +27,8 @@ const lists = document.querySelectorAll('.task-list');
 // --- Auth Logic ---
 const authOverlay = document.getElementById('auth-overlay');
 const loginBtn = document.getElementById('loginBtn');
-const logoutBtn = document.getElementById('logoutBtn');
+const userProfile = document.getElementById('userProfile');
+const userAvatar = document.getElementById('userAvatar');
 
 loginBtn.addEventListener('click', async () => {
     try {
@@ -38,18 +39,21 @@ loginBtn.addEventListener('click', async () => {
     }
 });
 
-logoutBtn.addEventListener('click', () => signOut(auth));
+userProfile.addEventListener('click', () => {
+    if(confirm('Do you want to log out?')) signOut(auth);
+});
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
         authOverlay.style.display = 'none';
-        logoutBtn.style.display = 'inline-flex';
+        userProfile.style.display = 'flex';
+        userAvatar.src = user.photoURL || 'https://via.placeholder.com/36';
         initBoard();
     } else {
         currentUser = null;
         authOverlay.style.display = 'flex';
-        logoutBtn.style.display = 'none';
+        userProfile.style.display = 'none';
         if (unsubscribeSnapshot) {
             unsubscribeSnapshot();
             unsubscribeSnapshot = null;
@@ -174,6 +178,21 @@ window.deleteTask = async function(id) {
             await deleteDoc(doc(db, 'tasks', id));
         } catch (e) {
             console.error("Error deleting document: ", e);
+        }
+    }
+};
+
+window.clearDoneTasks = async function() {
+    const doneTasks = tasks.filter(t => t.status === 'done');
+    if (doneTasks.length === 0) return;
+    if (confirm(`Are you sure you want to delete ${doneTasks.length} completed task(s)?`)) {
+        try {
+            for (const task of doneTasks) {
+                await deleteDoc(doc(db, 'tasks', task.id));
+            }
+        } catch (e) {
+            console.error("Error clearing tasks: ", e);
+            alert("Failed to clear tasks.");
         }
     }
 };

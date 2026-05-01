@@ -17,7 +17,9 @@
             <input type="text" id="aiTaskInput" placeholder="✨ Ask AI to break down a project... (e.g. 'Build a blog')">
             <button id="aiGenerateBtn"><span class="material-icons">auto_awesome</span> Generate</button>
             <button id="aiReviewBtn" style="background: #10b981; margin-left: 5px;"><span class="material-icons">analytics</span> Review</button>
-            <button id="logoutBtn" style="display: none; background: #ef4444; margin-left: 5px;"><span class="material-icons">logout</span></button>
+            <div id="userProfile" style="display: none; align-items: center; margin-left: 10px; cursor: pointer;" title="Click to Logout">
+                <img id="userAvatar" src="" alt="Profile" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--primary); transition: transform 0.2s;">
+            </div>
         </div>
     </header>
 
@@ -58,6 +60,7 @@
         <div class="column" id="done-col">
             <div class="column-header">
                 <h2>✅ Done</h2>
+                <button class="add-task-btn" onclick="clearDoneTasks()" title="Clear All Done"><span class="material-icons" style="color: #ef4444; font-size: 20px;">delete_sweep</span></button>
             </div>
             <div class="task-list" data-status="done"></div>
         </div>
