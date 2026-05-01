@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Kanban Board | RoMeoTOTO</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <header class="app-header">
+        <div class="logo">
+            <span class="material-icons" style="color: #6366f1;">view_kanban</span>
+            <h1>AI Kanban Board</h1>
+        </div>
+        <div class="ai-input-group">
+            <input type="text" id="aiTaskInput" placeholder="✨ Ask AI to break down a project... (e.g. 'Build a blog')">
+            <button id="aiGenerateBtn"><span class="material-icons">auto_awesome</span> Generate Tasks</button>
+        </div>
+    </header>
+
+    <main class="board">
+        <!-- To Do Column -->
+        <div class="column" id="todo-col">
+            <div class="column-header">
+                <h2>📝 To Do</h2>
+                <button class="add-task-btn" onclick="addNewTask('todo-col')"><span class="material-icons">add</span></button>
+            </div>
+            <div class="task-list" data-status="todo">
+                <!-- Tasks will be injected here -->
+            </div>
+        </div>
+
+        <!-- Doing Column -->
+        <div class="column" id="doing-col">
+            <div class="column-header">
+                <h2>⏳ Doing</h2>
+            </div>
+            <div class="task-list" data-status="doing"></div>
+        </div>
+
+        <!-- Done Column -->
+        <div class="column" id="done-col">
+            <div class="column-header">
+                <h2>✅ Done</h2>
+            </div>
+            <div class="task-list" data-status="done"></div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
