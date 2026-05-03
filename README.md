@@ -1,5 +1,9 @@
 # ✨ AI-Powered Kanban Board
 
+<div align="center">
+<i>👉 <a href="README-th.md">🇹🇭 อ่านรายละเอียดภาษาไทย</a></i><br><br>
+</div>
+
 ![Build Status](https://img.shields.io/badge/Build-Success-brightgreen)
 ![Tech Stack](https://img.shields.io/badge/Tech-HTML5%20%7C%20CSS3%20%7C%20VanillaJS-blue)
 ![Database](https://img.shields.io/badge/Database-Firebase%20Firestore-orange)
