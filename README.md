@@ -10,6 +10,12 @@
 ![AI](https://img.shields.io/badge/AI-Google%20Gemini%202.5-purple)
 ![License](https://img.shields.io/badge/License-MIT-gray)
 
+<div align="center">
+
+![AI Kanban Board](screenshot.png)
+
+</div>
+
 A premium, highly interactive **Real-time Kanban Board** featuring native Drag & Drop functionality, glassmorphism aesthetics, and integrated AI task generation. Built to demonstrate proficiency in modern web engineering without relying on heavy frameworks.
 
 ---
