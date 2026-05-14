@@ -1,16 +1,17 @@
-# ✨ AI-Powered Kanban Board
+# ✨ AI-Powered Kanban Board
 
 <div align="center">
 <i>👉 <a href="README-th.md">🇹🇭 อ่านรายละเอียดภาษาไทย</a></i><br><br>
-</div>
 
-![Build Status](https://img.shields.io/badge/Build-Success-brightgreen)
-![Tech Stack](https://img.shields.io/badge/Tech-HTML5%20%7C%20CSS3%20%7C%20VanillaJS-blue)
-![Database](https://img.shields.io/badge/Database-Firebase%20Firestore-orange)
-![AI](https://img.shields.io/badge/AI-Google%20Gemini%202.5-purple)
-![License](https://img.shields.io/badge/License-MIT-gray)
+[![Release](https://img.shields.io/github/v/release/romeototo/ai-kanban-board?style=for-the-badge)](https://github.com/romeototo/ai-kanban-board/releases)
+[![Code Quality](https://img.shields.io/github/actions/workflow/status/romeototo/ai-kanban-board/code-quality.yml?style=for-the-badge&label=Code_Quality)](https://github.com/romeototo/ai-kanban-board/actions)
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-GitHub_Pages-6366f1?style=for-the-badge)](https://romeototo.github.io/ai-kanban-board/)
+[![Tech Stack](https://img.shields.io/badge/Tech-HTML5_|_CSS3_|_VanillaJS-3776ab?style=for-the-badge&logo=javascript&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![Database](https://img.shields.io/badge/Database-Firebase_Firestore-ffca28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
+[![AI](https://img.shields.io/badge/AI-Google_Gemini_2.5-4285f4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
+[![License](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)](LICENSE)
 
-<div align="center">
+<br>
 
 ![AI Kanban Board](screenshot.png)
 
