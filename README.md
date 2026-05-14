@@ -20,6 +20,19 @@ A premium, highly interactive **Real-time Kanban Board** featuring native Drag &
 
 ---
 
+## Project Snapshot
+
+| Item | Details |
+| ---- | ------- |
+| **Role** | AI-assisted planning board for turning rough work into smaller tasks |
+| **Live demo** | [romeototo.github.io/ai-kanban-board](https://romeototo.github.io/ai-kanban-board/) |
+| **Stack** | HTML, CSS, Vanilla JavaScript, Firebase, Gemini API |
+| **Impact** | AI task breakdown, Firebase sync, drag-and-drop planning, analytics feedback |
+| **Status** | Active productivity tool |
+| **Portfolio case study** | [AI-Powered Kanban Board](https://romeototo.github.io/portfolio-website/case-studies/ai-kanban-board/) |
+
+---
+
 ## 🚀 Key Features
 
 - **🪄 AI Task Decomposition:** Input a broad project idea, and the integrated **Google Gemini 2.5 Flash** model will instantly break it down into actionable tasks.
