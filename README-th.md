@@ -13,6 +13,19 @@
 
 ---
 
+## Project Snapshot
+
+| รายการ | รายละเอียด |
+| ------ | ----------- |
+| **บทบาท** | AI-assisted planning board สำหรับแปลงงานกว้าง ๆ ให้เป็น task ย่อย |
+| **Live demo** | [romeototo.github.io/ai-kanban-board](https://romeototo.github.io/ai-kanban-board/) |
+| **Stack** | HTML, CSS, Vanilla JavaScript, Firebase, Gemini API |
+| **Impact** | AI task breakdown, Firebase sync, drag-and-drop planning, analytics feedback |
+| **สถานะ** | Active productivity tool |
+| **Portfolio case study** | [AI-Powered Kanban Board](https://romeototo.github.io/portfolio-website/case-studies/ai-kanban-board/) |
+
+---
+
 ## 🚀 ฟีเจอร์หลัก
 
 - **🪄 AI Task Decomposition:** เพียงใส่แนวคิดโปรเจกต์กว้างๆ ระบบจะใช้ **Google Gemini 2.5 Flash** เพื่อย่อยงานเหล่านั้นออกมาเป็น Task ย่อยๆ ที่ทำได้จริงทันที
